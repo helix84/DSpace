@@ -18,6 +18,7 @@ import org.dspace.app.xmlui.wing.element.*;
 import org.dspace.content.*;
 import org.dspace.content.Item;
 import org.dspace.core.Constants;
+import org.dspace.core.ConfigurationManager;
 import org.dspace.statistics.DataTermsFacet;
 import org.dspace.statistics.ElasticSearchLogger;
 import org.elasticsearch.action.search.SearchResponse;
@@ -131,9 +132,11 @@ public class ElasticSearchStatsViewer extends AbstractDSpaceTransformer {
                 //Homepage will show the last 5 years worth of Data, and no form generator.
                 Calendar cal = Calendar.getInstance();
                 dateEnd = cal.getTime();
-
+                
+                int years = ConfigurationManager.getIntProperty("elastic-search-statistics", "recent.years", 5);
+                
                 //Roll back to Jan 1 0:00.000 five years ago.
-                cal.roll(Calendar.YEAR, -5);
+                cal.roll(Calendar.YEAR, -years);
                 cal.set(Calendar.MONTH, 0);
                 cal.set(Calendar.DAY_OF_MONTH, 1);
                 cal.set(Calendar.HOUR_OF_DAY,0);
@@ -143,7 +146,7 @@ public class ElasticSearchStatsViewer extends AbstractDSpaceTransformer {
                 dateStart = cal.getTime();
 
                 division.addHidden("reportDepth").setValue("summary");
-                String dateRange = "Last Five Years";
+                String dateRange = "Last " + years + " Years";
                 division.addPara("Showing Data ( " + dateRange + " )");
                 division.addHidden("timeRangeString").setValue("Data Range: " + dateRange);
                 if(dateStart != null) {
