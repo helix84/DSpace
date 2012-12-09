@@ -18,6 +18,7 @@ import org.dspace.app.xmlui.wing.element.*;
 import org.dspace.content.*;
 import org.dspace.content.Item;
 import org.dspace.core.Constants;
+import org.dspace.core.ConfigurationManager;
 import org.dspace.statistics.DataTermsFacet;
 import org.dspace.statistics.ElasticSearchLogger;
 import org.elasticsearch.action.search.SearchResponse;
@@ -173,8 +174,10 @@ public class ElasticSearchStatsViewer extends AbstractDSpaceTransformer {
                 Calendar cal = Calendar.getInstance();
                 dateEnd = cal.getTime();
 
+                int years = ConfigurationManager.getIntProperty("elastic-search-statistics", "recent.years", 5);
+
                 //Roll back to Jan 1 0:00.000 five years ago.
-                cal.roll(Calendar.YEAR, -5);
+                cal.roll(Calendar.YEAR, -years);
                 cal.set(Calendar.MONTH, 0);
                 cal.set(Calendar.DAY_OF_MONTH, 1);
                 cal.set(Calendar.HOUR_OF_DAY,0);
@@ -187,9 +190,9 @@ public class ElasticSearchStatsViewer extends AbstractDSpaceTransformer {
 
                 Para divisionPara = division.addPara();
                 divisionPara.addContent(T_showDataRange);
-                divisionPara.addContent(T_lastFiveYears);
+                divisionPara.addContent(T_lastFiveYears.parameterize(years));
 
-                String dateRange = "Last Five Years";
+                String dateRange = "Last " + years + " Years";
                 division.addHidden("timeRangeString").setValue("Data Range: " + dateRange);
                 
                 if(dateStart != null) {
