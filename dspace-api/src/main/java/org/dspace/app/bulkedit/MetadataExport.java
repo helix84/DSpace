@@ -22,6 +22,7 @@ import java.util.List;
  * Metadata exporter to allow the batch export of metadata into a file
  *
  * @author Stuart Lewis
+ * @author Adán Roman Ruiz at arvo.es
  */
 public class MetadataExport
 {
@@ -120,25 +121,20 @@ public class MetadataExport
      * Run the export
      *
      * @return the exported CSV lines
+     * @throws Exception 
+     * @throws SQLException 
      */
-    public DSpaceCSV export()
+    public DSpaceCSV export() throws SQLException, Exception
     {
-        try
+        // Process each item
+        DSpaceCSV csv = new DSpaceCSV(exportAll);
+        while (toExport.hasNext())
         {
-            // Process each item
-            DSpaceCSV csv = new DSpaceCSV(exportAll);
-            while (toExport.hasNext())
-            {
-                csv.addItem(toExport.next());
-            }
+            csv.addItem(toExport.next());
+        }
 
-            // Return the results
-            return csv;
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
+        // Return the results
+        return csv;     
     }
 
     /**
