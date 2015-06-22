@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+<!--    <servers>
+        <server>
+            <id>artifactory-private</id>
+            <username>${env.CI_DEPLOY_USERNAME}</username>
+            <password>${env.CI_DEPLOY_PASSWORD}</password>
+        </server>
+    </servers>-->
+
+    <profiles>
+        <profile>
+            <id>artifactory</id>
+            <repositories>
+                <repository>
+                    <id>artifactory-private</id>
+                    <name>alvch3rd</name>
+                    <url>https://alvch.artifactoryonline.com/alvch/third-party</url>
+                </repository>
+                <repository>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <id>alvch-central</id>
+                    <name>libs-releases</name>
+                    <url>http://alvch.artifactoryonline.com/alvch/libs-releases</url>
+                </repository>
+                <repository>
+                    <snapshots />
+                    <id>alvch-snapshots</id>
+                    <name>libs-snapshots</name>
+                    <url>http://alvch.artifactoryonline.com/alvch/libs-snapshots</url>
+                </repository>
+                <repository>
+                    <id>oss-jfrog-artifactory</id>
+                    <name>oss-jfrog-artifactory-releases</name>
+                    <url>http://oss.jfrog.org/artifactory/oss-release-local</url>
+                </repository>
+                <repository>
+                    <id>mulesoft-releases</id>
+                    <name>MuleSoft Releases Repository</name>
+                    <url>https://repository-master.mulesoft.org/releases/</url>
+                </repository>
+                <repository>
+                    <id>mulesoft-snapshots</id>
+                    <name>MuleSoft Snapshots Repository</name>
+                    <url>https://repository-master.mulesoft.org/snapshots/</url>
+                </repository>
+                <repository>
+                    <id>spring-libs-milestone</id>
+                    <name>Spring Milestone Repository</name>
+                    <url>http://repo.spring.io/libs-milestone</url>
+                </repository>
+                <repository>
+                    <id>spring-libs-snapshot</id>
+                    <name>Spring Snapshot Repository</name>
+                    <url>http://repo.spring.io/libs-snapshot</url>
+                </repository>
+                <repository>
+                    <id>sonatype</id>
+                    <name>Sonatype Groups</name>
+                    <url>https://oss.sonatype.org/content/groups/public/</url>
+                </repository>
+                <repository>
+                    <id>sonatype-snapshots</id>
+                    <name>Sonatype</name>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+                </repository>
+                <repository>
+                    <id>central</id>
+                    <name>Spring</name>
+                    <url>http://repo1.maven.org/maven2/</url>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+
+
+    <activeProfiles>
+        <activeProfile>artifactory</activeProfile>
+    </activeProfiles>
+
+</settings>
+
