@@ -18,6 +18,8 @@ import org.dspace.core.*;
 import org.dspace.handle.factory.HandleServiceFactory;
 
 import java.util.*;
+import org.dspace.services.ConfigurationService;
+import org.dspace.services.factory.DSpaceServicesFactory;
 import org.dspace.core.factory.CoreServiceFactory;
 
 /**
@@ -144,6 +146,8 @@ public class MediaFilterCLITool {
             }
         }
 
+        ConfigurationService config = DSpaceServicesFactory.getInstance().getConfigurationService();
+
         String filterNames[] = null;
         if(line.hasOption('p'))
         {
@@ -162,8 +166,7 @@ public class MediaFilterCLITool {
         else
         {
             //retrieve list of all enabled media filter plugins!
-            String enabledPlugins = ConfigurationManager.getProperty(MEDIA_FILTER_PLUGINS_KEY);
-            filterNames = enabledPlugins.split(",\\s*");
+            filterNames = config.getArrayProperty(MEDIA_FILTER_PLUGINS_KEY);
         }
 
         MediaFilterService mediaFilterService = MediaFilterServiceFactory.getInstance().getMediaFilterService();
@@ -210,10 +213,10 @@ public class MediaFilterCLITool {
                 //  filter.<class-name>.<plugin-name>.inputFormats
                 //For other MediaFilters, format of key is:
                 //  filter.<class-name>.inputFormats
-                String formats = ConfigurationManager.getProperty(
+                String formats = config.getProperty(
                         FILTER_PREFIX + "." + filterClassName +
-                                (pluginName!=null ? "." + pluginName : "") +
-                                "." + INPUT_FORMATS_SUFFIX);
+                        (pluginName!=null ? "." + pluginName : "") +
+                        "." + INPUT_FORMATS_SUFFIX);
 
                 //add to internal map of filters to supported formats
                 if (formats != null)
