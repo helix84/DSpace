@@ -28,12 +28,17 @@ import org.dspace.event.Event;
 import org.dspace.identifier.IdentifierException;
 import org.dspace.identifier.service.IdentifierService;
 import org.dspace.versioning.service.VersioningService;
+import org.dspace.content.service.WorkspaceItemService;
+import org.dspace.content.WorkspaceItem;
+import org.dspace.workflow.WorkflowItemService;
+import org.dspace.workflow.WorkflowItem;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Service implementation for the Item object.
@@ -70,6 +75,10 @@ public class ItemServiceImpl extends DSpaceObjectServiceImpl<Item> implements It
     protected ResourcePolicyService resourcePolicyService;
     @Autowired(required = true)
     protected CollectionService collectionService;
+    @Autowired(required = true)
+    protected WorkspaceItemService workspaceItemService;
+    @Autowired(required = true)
+    protected WorkflowItemService workflowItemService;
     @Autowired(required = true)
     protected IdentifierService identifierService;
     @Autowired(required = true)
@@ -468,6 +477,35 @@ public class ItemServiceImpl extends DSpaceObjectServiceImpl<Item> implements It
             item.clearModified();
             item.clearDetails();
         }
+    }
+
+    @Override
+    public void expunge(Context context, Item item) throws SQLException, AuthorizeException, IOException
+    {
+        // Check authorisation here. If we don't, it may happen that we remove the
+        // metadata but when getting to the point of removing the bundles we get an exception
+        // leaving the database in an inconsistent state
+        authorizeService.authorizeAction(context, item, Constants.REMOVE);
+
+        // Remove this Item from any Collections it may be in.
+        List<Collection> collectionList = item.getCollections();
+        Collection[] collections = collectionList.toArray(new Collection[collectionList.size()]);
+        for (Collection collection : collections)
+        {  
+            collectionService.removeItem(context, collection, item);
+        }
+
+        // If it is in someone's workspace, remove it therefrom.
+        WorkspaceItem wsItem = workspaceItemService.findByItem(context, item);
+        if (null != wsItem)
+            workspaceItemService.deleteWrapper(context, wsItem);
+
+        // If it is in a workflow, remove it therefrom.
+        WorkflowItem wfItem = workflowItemService.findByItem(context, item);
+        if (null != wfItem)
+            workflowItemService.deleteWrapper(context, wfItem);
+
+        this.delete(context, item); // not strictly necessary as collection.removeItem() calls this if it's the item's only remaining owning collection
     }
 
     @Override

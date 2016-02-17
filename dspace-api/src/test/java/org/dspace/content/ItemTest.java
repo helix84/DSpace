@@ -1243,6 +1243,42 @@ public class ItemTest  extends AbstractDSpaceObjectTest
     }
 
     /**
+     * Test of expunge method, of class Item.
+     */
+    @Test
+    public void testExpungeAuth() throws Exception
+    {
+        new NonStrictExpectations(authorizeService.getClass())
+        {{
+            // Allow Item REMOVE perms
+            authorizeService.authorizeAction((Context) any, (Item) any,
+                    Constants.REMOVE, true); result = null;
+        }};
+
+        UUID id = it.getID();
+        itemService.expunge(context, it);
+        Item found =  itemService.find(context, id);
+        assertThat("testExpungeAuth 0", found, nullValue());
+    }
+
+    /**
+     * Test of expunge method, of class Item.
+     */
+    @Test(expected=AuthorizeException.class)
+    public void testExpungeNoAuth() throws Exception
+    {
+        new NonStrictExpectations(authorizeService.getClass())
+        {{
+            // Disallow Item REMOVE perms
+            authorizeService.authorizeAction((Context) any, (Item) any,
+                    Constants.REMOVE); result = new AuthorizeException();
+        }};
+        
+        itemService.expunge(context, it);
+        fail("Exception expected");
+    }
+
+    /**
      * Test of equals method, of class Item.
      */
     @Test

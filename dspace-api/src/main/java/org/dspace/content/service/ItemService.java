@@ -261,6 +261,16 @@ public interface ItemService extends DSpaceObjectService<Item>, DSpaceObjectLega
     public void removeLicenses(Context context, Item item) throws SQLException, AuthorizeException, IOException;
 
     /**
+     * Delete the item from the archive, remove it from collections. 
+     * This operation cannot be undone.
+     * 
+     * @throws SQLException
+     * @throws AuthorizeException
+     * @throws IOException
+     */
+    public void expunge(Context context, Item item) throws SQLException, AuthorizeException, IOException;
+
+    /**
      * Withdraw the item from the archive. It is kept in place, and the content
      * and metadata are not deleted, but it is not publicly accessible.
      *
