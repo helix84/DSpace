@@ -1181,7 +1181,7 @@
          <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.187</version>
+            <version>1.4.190</version>
             <scope>test</scope>
          </dependency>
          <!-- Contiperf is used for performance tests within our Unit/Integration tests -->
