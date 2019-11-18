@@ -22,11 +22,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.dspace.authorize.AuthorizeException;
-import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Context;
 import org.dspace.core.LogManager;
 import org.dspace.eperson.EPerson;
 import org.dspace.eperson.Group;
+import org.dspace.utils.DSpace;
 
 /**
  * This combined LDAP authentication method supersedes both the 'LDAPAuthentication'
@@ -56,7 +56,8 @@ public class LDAPAuthentication
         throws SQLException
     {
         // Looks to see if autoregister is set or not
-        return ConfigurationManager.getBooleanProperty("authentication-ldap", "autoregister");
+        return new DSpace().getConfigurationService()
+            .getPropertyAsType("authentication-ldap.autoregister", boolean.class);
     }
 
     /**
@@ -101,7 +102,8 @@ public class LDAPAuthentication
         {
             if (!context.getCurrentUser().getNetid().equals(""))
             {
-                String groupName = ConfigurationManager.getProperty("authentication-ldap", "login.specialgroup");
+                String groupName = new DSpace().getConfigurationService()
+                    .getProperty("authentication-ldap.login.specialgroup");
                 if (StringUtils.isNotBlank(groupName))
                 {
                     Group ldapGroup = Group.findByName(context, groupName);
@@ -185,11 +187,12 @@ public class LDAPAuthentication
         SpeakerToLDAP ldap = new SpeakerToLDAP(log);
 
         // Get the DN of the user
-        boolean anonymousSearch = ConfigurationManager.getBooleanProperty("authentication-ldap", "search.anonymous");
-        String adminUser = ConfigurationManager.getProperty("authentication-ldap", "search.user");
-        String adminPassword = ConfigurationManager.getProperty("authentication-ldap", "search.password");
-        String objectContext = ConfigurationManager.getProperty("authentication-ldap", "object_context");
-        String idField = ConfigurationManager.getProperty("authentication-ldap", "id_field");
+        boolean anonymousSearch = new DSpace().getConfigurationService()
+            .getPropertyAsType("authentication-ldap.search.anonymous", boolean.class);
+        String adminUser = new DSpace().getConfigurationService().getProperty("authentication-ldap.search.user");
+        String adminPassword = new DSpace().getConfigurationService().getProperty("authentication-ldap.search.password");
+        String objectContext = new DSpace().getConfigurationService().getProperty("authentication-ldap.object_context");
+        String idField = new DSpace().getConfigurationService().getProperty("authentication-ldap.id_field");
         String dn = "";
 
         // If adminUser is blank and anonymous search is not allowed, then we can't search so
@@ -257,9 +260,11 @@ public class LDAPAuthentication
                 if (StringUtils.isEmpty(email))
                 {
                     // If no email, check if we have a "netid_email_domain". If so, append it to the netid to create email
-                    if (StringUtils.isNotEmpty(ConfigurationManager.getProperty("authentication-ldap", "netid_email_domain")))
+                    final String netid_email_domain = new DSpace().getConfigurationService()
+                        .getProperty("authentication-ldap.netid_email_domain");
+                    if (StringUtils.isNotEmpty(netid_email_domain))
                     {
-                        email = netid + ConfigurationManager.getProperty("authentication-ldap", "netid_email_domain");
+                        email = netid + netid_email_domain;
                     }
                     else
                     {
@@ -380,16 +385,16 @@ public class LDAPAuthentication
 
 
         /** LDAP settings */
-        String ldap_provider_url = ConfigurationManager.getProperty("authentication-ldap", "provider_url");
-        String ldap_id_field = ConfigurationManager.getProperty("authentication-ldap", "id_field");
-        String ldap_search_context = ConfigurationManager.getProperty("authentication-ldap", "search_context");
-        String ldap_search_scope = ConfigurationManager.getProperty("authentication-ldap", "search_scope");
+        String ldap_provider_url = new DSpace().getConfigurationService().getProperty("authentication-ldap.provider_url");
+        String ldap_id_field = new DSpace().getConfigurationService().getProperty("authentication-ldap.id_field");
+        String ldap_search_context = new DSpace().getConfigurationService().getProperty("authentication-ldap.search_context");
+        String ldap_search_scope = new DSpace().getConfigurationService().getProperty("authentication-ldap.search_scope");
 
-        String ldap_email_field = ConfigurationManager.getProperty("authentication-ldap", "email_field");
-        String ldap_givenname_field = ConfigurationManager.getProperty("authentication-ldap", "givenname_field");
-        String ldap_surname_field = ConfigurationManager.getProperty("authentication-ldap", "surname_field");
-        String ldap_phone_field = ConfigurationManager.getProperty("authentication-ldap", "phone_field");
-        String ldap_group_field = ConfigurationManager.getProperty("authentication-ldap", "login.groupmap.attribute"); 
+        String ldap_email_field = new DSpace().getConfigurationService().getProperty("authentication-ldap.email_field");
+        String ldap_givenname_field = new DSpace().getConfigurationService().getProperty("authentication-ldap.givenname_field");
+        String ldap_surname_field = new DSpace().getConfigurationService().getProperty("authentication-ldap.surname_field");
+        String ldap_phone_field = new DSpace().getConfigurationService().getProperty("authentication-ldap.phone_field");
+        String ldap_group_field = new DSpace().getConfigurationService().getProperty("authentication-ldap.login.groupmap.attribute"); 
 
         SpeakerToLDAP(Logger thelog)
         {
@@ -672,14 +677,14 @@ public class LDAPAuthentication
         // TODO: ConfigurationService.getArrayProperty() from DSpace 6;
         //       should be simpler but incompatible with DSpace 5
         int i = 1;
-        String groupMapItem = ConfigurationManager.getProperty("authentication-ldap", "login.groupmap." + i);
+        String groupMapItem = new DSpace().getConfigurationService().getProperty("authentication-ldap.login.groupmap." + i);
 
         while (groupMapItem != null)
         {
             String t[] = groupMapItem.split(":");
             groupMap.put(t[0].toLowerCase(), t[1]);
  
-            groupMapItem = ConfigurationManager.getProperty("authentication-ldap", "login.groupmap." + ++i);
+            groupMapItem = new DSpace().getConfigurationService().getProperty("authentication-ldap.login.groupmap." + ++i);
         }
 
         // take the set of map keys (mapped LDAP groups) and find
