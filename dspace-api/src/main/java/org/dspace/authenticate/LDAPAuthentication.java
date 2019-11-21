@@ -197,13 +197,16 @@ public class LDAPAuthentication
 
         // If adminUser is blank and anonymous search is not allowed, then we can't search so
         // construct the DN instead of searching it
+System.out.println("search? " + StringUtils.isBlank(adminUser) + StringUtils.isBlank(adminPassword) + !anonymousSearch);
         if ((StringUtils.isBlank(adminUser) || StringUtils.isBlank(adminPassword)) && !anonymousSearch)
         {
             dn = idField + "=" + netid + "," + objectContext;
+System.out.println(" dn constructed:" + dn);
         }
         else
         {
             dn = ldap.getDNOfUser(adminUser, adminPassword, context, netid);
+System.out.println(" after getDNOfUser():" + ldap.ldapGroupSet);
         }
 
         // Check a DN was found
@@ -232,6 +235,7 @@ public class LDAPAuthentication
                 context.setCurrentUser(eperson);
 
                 // assign user to groups based on ldap dn
+System.out.println("1 assignGroups(" + dn + ", " + ldap.ldapGroupSet + ", " + context + ");");
                 assignGroups(dn, ldap.ldapGroupSet, context);
                 
                 log.info(LogManager
@@ -294,6 +298,7 @@ public class LDAPAuthentication
                             context.setCurrentUser(eperson);
 
                             // assign user to groups based on ldap dn
+System.out.println("2 assignGroups(" + dn + ", " + ldap.ldapGroupSet + ", " + context + ");");
                             assignGroups(dn, ldap.ldapGroupSet, context);
 
                             return SUCCESS;
@@ -331,6 +336,7 @@ public class LDAPAuthentication
                                     context.setCurrentUser(eperson);
 
                                     // assign user to groups based on ldap dn
+System.out.println("3 assignGroups(" + dn + ", " + ldap.ldapGroupSet + ", " + context + ");");
                                     assignGroups(dn, ldap.ldapGroupSet, context);
                                 }
                                 catch (AuthorizeException e)
@@ -496,6 +502,7 @@ public class LDAPAuthentication
                                 ldapSurname = (String) att.get();
                             }
                         }
+System.out.println("  ldapSurname:" + ldapSurname);
 
                         if (attlist[3] != null) {
                             att = atts.get(attlist[3]);
@@ -505,6 +512,7 @@ public class LDAPAuthentication
                             }
                         }
                 
+System.out.println("  attlist[4] = '" + attlist[4] + "'");
                         if (attlist[4] != null) {
                             try {
                                 // loop all attributes
@@ -515,10 +523,13 @@ public class LDAPAuthentication
                                     if (attribute.getID().equalsIgnoreCase(attlist[4]))
                                     {
                                         // loop all values of the group attribute, add them to a set
+System.out.println("  attr MATCH: '" + attribute.getID() + "'");
                                         for (NamingEnumeration val = attribute.getAll(); val.hasMore();)
                                         {
                                             String lcLdapGroup = ((String) val.next()).toLowerCase();
+System.out.println("  attr MATCH loop; lcLdapGroup: " + lcLdapGroup);
                                             ldapGroupSet.add(lcLdapGroup);
+System.out.println("  Group added to ldapGroupSet as\t" + lcLdapGroup);
                                         }
                                     }
                                 }
@@ -682,6 +693,7 @@ public class LDAPAuthentication
         while (groupMapItem != null)
         {
             String t[] = groupMapItem.split(":");
+System.out.println("  groupMapItem: " + groupMapItem);
             groupMap.put(t[0].toLowerCase(), t[1]);
  
             groupMapItem = new DSpace().getConfigurationService().getProperty("authentication-ldap.login.groupmap." + ++i);
@@ -690,21 +702,26 @@ public class LDAPAuthentication
         // take the set of map keys (mapped LDAP groups) and find
         // an intersection with user's ldapGroupSet
         Set<String> groupMapGroupSet = groupMap.keySet();
+for (String g : groupMapGroupSet) System.out.println("  groupMapGroupSet: " + g);
 
         if (ldapGroupSet.isEmpty())
         {
+System.out.println("  ldapGroupSet is empty");
             // assign groups by matching DN substring
             for (String groupMapGroup : groupMapGroupSet) {
                 if (StringUtils.containsIgnoreCase(dn, groupMapGroup + ",")) {
                     String dspaceGroup = groupMap.get(groupMapGroup);
                     assignGroup(context, dspaceGroup);
+System.out.println("  assigned group: " + dspaceGroup);
                 }
             }
         } else {
             // assign groups by LDAP group
 
             Set<String> intersection = new HashSet<String>(ldapGroupSet);
+for (String g : ldapGroupSet) System.out.println("  ldapGroupSet: " + g);
             intersection.retainAll(groupMapGroupSet);
+for (String g : intersection) System.out.println("  intersection: " + g);
     
             // assign the current user to DSpace groups for which both is true:
             // * user is a member of the LDAP group
@@ -712,6 +729,7 @@ public class LDAPAuthentication
             for (String ldapGroup : intersection) {
                 String dspaceGroup = groupMap.get(ldapGroup);
                 assignGroup(context, dspaceGroup);
+System.out.println("  assigned group: " + dspaceGroup);
             }
         }
     }
